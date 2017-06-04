@@ -6,6 +6,9 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras.layers import AveragePooling2D
 from keras.callbacks import ModelCheckpoint
 from keras.optimizers import Adam
+from keras.models import Sequential
+from keras.layers import Dense
+from keras import regularizers
 
 def SqueezeNet(nb_classes, inputs=(3, 224, 224), learning_rate=0.0001, is_testing=False):
     """ Keras Implementation of SqueezeNet(arXiv 1602.07360)
@@ -168,6 +171,54 @@ def SqueezeNet(nb_classes, inputs=(3, 224, 224), learning_rate=0.0001, is_testin
             metrics=['accuracy'])
 
         print('squeezeNet model summary: ')
+        print(model.summary())
+
+        # checkpoint
+        checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+        callbacks_list = [checkpoint]
+
+    return model, callbacks_list
+
+
+
+def ConvNet(nb_classes, inputs=(3, 224, 224), learning_rate=0.0001, reg=0.001, is_testing=False):
+    """ Keras Implementation of SqueezeNet(arXiv 1602.07360)
+    @param nb_classes: total number of final categories
+    Arguments:
+    inputs -- shape of the input images (channel, cols, rows)
+    """
+    model = Sequential()
+    model.add(Convolution2D(
+        96, (7, 7), activation='relu', kernel_initializer='glorot_uniform',
+        strides=(2, 2), padding='same', name='conv1', input_shape=inputs,
+        data_format="channels_first"))
+    model.add(Convolution2D(
+        96, (5, 5), activation='relu', kernel_initializer='glorot_uniform',
+        strides=(2, 2), padding='same', name='conv2',
+        data_format="channels_first"))
+    model.add(Convolution2D(
+        128, (3, 3), activation='relu', kernel_initializer='glorot_uniform',
+        strides=(2, 2), padding='same', name='conv3',
+        data_format="channels_first"))
+    model.add(MaxPooling2D(
+        pool_size=(3, 3), strides=(2, 2), name='maxpool1',
+        data_format="channels_first"))
+    model.add(Dropout(0.5, name='dropout'))
+    model.add(Flatten(name='flatten'))
+    model.add(Dense(nb_classes, kernel_regularizer=regularizers.l2(reg), activation='softmax'))
+    
+    filepath="simple_weights.best.hdf5"
+
+    if is_testing:
+        model.load_weights("simple_weights.best.hdf5")
+        callbacks_list = None
+    else:
+        adam = Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+        model.compile(optimizer=adam,
+            loss='categorical_crossentropy',
+            metrics=['accuracy'])
+
+        print('conv model summary: ')
         print(model.summary())
 
         # checkpoint

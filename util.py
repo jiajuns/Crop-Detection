@@ -15,7 +15,7 @@ def load_negative_samples():
     pos_train_path_3 = os.path.join(current_path, 'Datasets', 'Tray', 'Ara2012')
 
     file_path = []
-    for train_path in [pos_train_path_1, pos_train_path_2, pos_train_path_3]:
+    for train_path in [pos_train_path_2]:
         for im_path in glob.glob(os.path.join(train_path, '*rgb.png')):
             bbox_path = im_path[:-7]+'bbox.csv'
             file_path.append((im_path, bbox_path))
@@ -33,7 +33,7 @@ def load_positive_samples():
     pos_train_path_3 = os.path.join(current_path, 'Datasets', 'Tray', 'Ara2012')
 
     file_path = []
-    for train_path in [pos_train_path_1, pos_train_path_2, pos_train_path_3]:
+    for train_path in [pos_train_path_2]:
         for im_path in glob.glob(os.path.join(train_path, '*rgb.png')):
             bbox_path = im_path[:-7]+'bbox.csv'
             file_path.append((im_path, bbox_path))
@@ -44,7 +44,7 @@ def load_positive_samples():
             positive_samples.append(sample)
     return positive_samples
 
-def generate_negative_samples(file_path_pair, window_size=(224, 224), step_size=(50, 50)):
+def generate_negative_samples(file_path_pair, window_size=(224, 224), step_size=(100, 100)):
     im_path, csv_file_path = file_path_pair
     bboxes = np.loadtxt(csv_file_path, delimiter=',')
 
@@ -62,12 +62,13 @@ def generate_negative_samples(file_path_pair, window_size=(224, 224), step_size=
         is_candidate = True
         for pos in positive_patch:
             if overlapping_plant(neg_candidate, pos) > 0.2:
+            # if overlapping_center(neg_candidate, pos, radius=200) is True:
                 is_candidate = False
         if is_candidate:
             negative_samples.append(im_window)
     return negative_samples
 
-def generate_positive_samples(file_path_pair, window_size=(224, 224), step_size=(20, 20)):
+def generate_positive_samples(file_path_pair, window_size=(224, 224), step_size=(30, 30)):
     im_path, csv_file_path = file_path_pair
     bboxes = np.loadtxt(csv_file_path, delimiter=',')
 
@@ -84,15 +85,17 @@ def generate_positive_samples(file_path_pair, window_size=(224, 224), step_size=
         pos_candidate = (x, y, window_size[1], window_size[0])
         is_candidate = False
         for pos in positive_patch:
+            # if overlapping_plant(pos_candidate, pos) > 0.9:
             if overlapping_center(pos_candidate, pos):
                 is_candidate = True
         if is_candidate:
-            for i in range(4):
+            # positive_samples.append(im_window)
+            for i in range(3):
                 im_window = np.rot90(im_window)
                 positive_samples.append(im_window)
     return positive_samples
 
-def overlapping_center(detection_1, detection_2, radius=20):
+def overlapping_center(detection_1, detection_2, radius=30):
     center_1 = np.array([detection_1[0] + detection_1[2]/2, detection_1[1] + detection_1[3]/2])
     center_2 = np.array([detection_2[0] + detection_2[2]/2, detection_2[1] + detection_2[3]/2])
 
