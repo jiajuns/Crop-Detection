@@ -15,7 +15,7 @@ def load_negative_samples():
     pos_train_path_3 = os.path.join(current_path, 'Datasets', 'Tray', 'Ara2012')
 
     file_path = []
-    for train_path in [pos_train_path_2]:
+    for train_path in [pos_train_path_1, pos_train_path_2, pos_train_path_3]:
         for im_path in glob.glob(os.path.join(train_path, '*rgb.png')):
             bbox_path = im_path[:-7]+'bbox.csv'
             file_path.append((im_path, bbox_path))
@@ -33,7 +33,7 @@ def load_positive_samples():
     pos_train_path_3 = os.path.join(current_path, 'Datasets', 'Tray', 'Ara2012')
 
     file_path = []
-    for train_path in [pos_train_path_2]:
+    for train_path in [pos_train_path_1, pos_train_path_2, pos_train_path_3]:
         for im_path in glob.glob(os.path.join(train_path, '*rgb.png')):
             bbox_path = im_path[:-7]+'bbox.csv'
             file_path.append((im_path, bbox_path))
